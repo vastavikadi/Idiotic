@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v3"
+	"idiotic/config"
 )
 
 type User struct {
@@ -20,6 +21,10 @@ type JSONTextResponse struct {
 
 func main() {
 	fmt.Print("Idiotic Here!")
+
+	fmt.Println("Connecting to the database...")
+	config.Init()
+
 
 	app := fiber.New(fiber.Config{
 		AppName: "Idiotic",

@@ -1,34 +1,44 @@
 package config
 
 import (
+	"context"
 	"fmt"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"log"
 	"os"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/urfave/cli/v2"
 )
 
-func connectToDatabase() {
-	//Loading variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	db_name := os.Getenv("DB_NAME")
-	db_user := os.Getenv("DB_USER")
-	db_password := os.Getenv("DB_PASSWORD")
-	db_host := os.Getenv("DB_HOST")
-	db_port := os.Getenv("DB_PORT")
+var pool *pgxpool.Pool
+var ctx = context.Background()
 
-	//connecting to database
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", db_user, db_password, db_host, db_port, db_name)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("Failed to connect to database!")
+
+func Init(){
+	var err error
+	pool, err = pgxpool.New(ctx,"postgres://admin:secret@localhost:5432/idiotic")
+	if err !=nil{
+		log.Fatal("Unable to connect to database:", err)
 	}
-	if db == nil {
-		panic("Database connection is nil!")
+
+	if err := pool.Ping(ctx); err != nil {
+		log.Fatal("Unable to ping database:", err)
 	}
-	fmt.Println("Database connection successful!")
+
+	fmt.Println("Connected to database successfully!")
+
+}
+
+func main(){
+	app := &cli.App{
+		Name: "Idiotic",
+		Usage: "A simple CLI program to execute operations related to the Idiotic application",
+        Commands: []*cli.Command{
+            // We'll add commands here
+        },
+	}
+	err := app.Run(os.Args)
+	if err != nil{
+		log.Fatal(err)
+	}
 }
